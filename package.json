@@ -1,0 +1,8 @@
+{
+	"name" : "nodeplatformBuild",
+	"version" : "0.0.1",
+	"dependencies" : { 
+		"cli-color" : "latest",
+		"mkdirp" : "latest"
+	}
+}
