@@ -3,6 +3,7 @@
 	"version" : "0.0.1",
 	"dependencies" : { 
 		"cli-color" : "latest",
-		"mkdirp" : "latest"
+		"mkdirp" : "latest",
+		"gitteh" : "git://github.com/jmendeth/node-gitteh.git"
 	}
 }
