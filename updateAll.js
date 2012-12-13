@@ -4,52 +4,52 @@ var exec = require('child_process').exec,
 	git = require('./git.js'),
 	path = require('path'),
 	fs = require('fs'),
-	yt = 'yipeeee',
 	mkdirp = require('mkdirp');
 
 var updateDirectory = function(directory){
 	var dependencyPath = 'lib';
+	//change dependencyPath to read from the dependency rules file
 	console.log('in: ' + process.cwd() + 'cding to: ' + directory);
 	process.chdir(directory);
-	exec('git branch', function(err, stdout, stderr){
-		console.log(color.cyan("Updating " + directory + " to latest " + stdout.substring(2)));
-	});
+	console.log('IN DIR : ' + process.cwd());
+	git.branch(function(branchOutput){
+		var branch = branchOutput.substring(2);
+		console.log(color.cyan("Updating " + directory + " to latest " + branch));
 
-	//change dependencyPath to read from the dependency rules file
-	if(fs.existsSync(dependencyPath))
-		exec('git checkout ' + dependencyPath);
+		if(fs.existsSync(dependencyPath))
+			git.checkout(dependencyPath);
 
-	exec('git status -s', function(err, stout, sterr){
-		var changes = stout === '';
-		if(changes){
-			console.log(color.blue('Changes will be stashed and re-applied'));
-			exec('git stash save "automatic stash"');
-			pull();
-			exec('git stash pop');
-		}
-		else{
-			console.log(color.blue('No local changes'));
-			pull();
-		}
+		git.status(function(stout){
+			var changes = stout === '';
+			if(changes){
+				console.log(color.blue('Changes will be stashed and re-applied'));
+				git.stash.push("automatic stash", function(){
+					console.log('pulling '+ directory);
+					git.pull(branch, function(){			
+						git.stash.pop();
+					});
+				});
+			}
+			else{
+				console.log(color.blue('No local changes'));
+				console.log('pulling '+ directory + ' branch '+branch);
+				git.pull(branch);
+			}
+		});
 	});
 }
 
-var pull = function(){
-	exec('git pull -q --recurse-submodules=yes -Xtheirs origin "$currentBranch"',function(err, stout, sterr){
-		console.log(sterr);
-	});
-}
 
 var cleanBuildDirectory= function(directory){
 	console.log('in ' + process.cwd());
 	console.log('going to ' + path.join(directory,'build'));
 	if(!fs.existsSync('build')) return;
 	process.chdir('build');
-	exec('git status -s',function(err, stdout, stderr){
+	git.status(function(stdout){
 		var changes = stdout.split('\n');
 		changes.forEach(function(change){
 			if(change.indexOf(' M ')===0 && change !== ' M Build.cmd')
-				exec('git checkout ' + change.substr(3));
+				git.checkout(change.substr(3));
 		});
 	});
 }
@@ -58,8 +58,10 @@ var updateAll = function(){
 	var repositories = getDirectories();
 	var baseDir = process.cwd();
 	console.log("Running all updates -- please wait");
+	console.log('this many repos: ' +repositories.length);
 	repositories.forEach(function(repo){
-		if(!fs.existsSync(repo.path)){ 
+		if(!fs.existsSync(path.join(repo.path,'.git'))){ 
+			console.log('making dir' + repo.path);
 			mkdirp.sync(repo.path);
 			git.clone(repo.url,repo.path,function(){
 				updateDirectory(repo.path);
@@ -68,7 +70,7 @@ var updateAll = function(){
 			});
 		}
 		else {
-			console.log('dir already there');
+			console.log('path exists :' + repo.path);
 			console.log(repo.path);
 			updateDirectory(repo.path);
 			cleanBuildDirectory(repo.path);
@@ -78,16 +80,19 @@ var updateAll = function(){
 }
 
 fs.readAllLines = function(path){
-	return fs.readFileSync(path,'utf8').split('\r\n');
+	var lines = fs.readFileSync(path,'utf8').split('\r\n');
+	return lines;
 }
 
 var getDirectories = function(){
 	var modules = [];
 	fs.readAllLines('_rules/Modules.rule').forEach(function(line){
-		modules.push({
-			path :line.substring(0,line.lastIndexOf('=')).trim(),
-			url :line.substring(line.lastIndexOf('=') + 1).trim()
-		});
+		if(line !== ''){
+			modules.push({
+				path :line.substring(0,line.lastIndexOf('=')).trim(),
+				url :line.substring(line.lastIndexOf('=') + 1).trim()
+			});
+		}
 	});
 	return modules;
 }
