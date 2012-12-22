@@ -4,6 +4,7 @@
 	"dependencies" : { 
 		"cli-color" : "latest",
 		"mkdirp" : "latest",
-		"gitteh" : "git://github.com/jmendeth/node-gitteh.git"
+		"gitteh" : "git://github.com/jmendeth/node-gitteh.git",
+		"rewire" : "latest"
 	}
 }
