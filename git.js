@@ -4,12 +4,13 @@ var exec = require('child_process').exec,
 var gitCommandExecute = function(command, opt ,cb){
 	opt = opt || {};
 	opt.print = opt.print!==false ;
+	opt.stdOutParser = opt.stdOutParser || function(stdOut){return stdOut} ;
 
 	exec('git ' + command, function(err, stout, sterr){
 		if(sterr) console.log(color.red('STERR: ' + sterr));
 		if(err) console.log(color.red('Err: ' + err));
 		if(stout && opt.print) console.log('Standard output: ' + stout);
-		if(cb) cb(stout);
+		if(cb) cb(opt.stdOutParser(stout));
 	});
 }
 
@@ -30,7 +31,12 @@ exports.stash = {
 	}
 }
 exports.status = function(cb){
-	gitCommandExecute('status -s',{print: false} ,cb);
+	gitCommandExecute('status -s',{
+		print: false, 
+		stdOutParser:function(stdOut){
+			return stdOut !== '';
+		}
+	} ,cb);
 }
 
 exports.branch = function(cb){
@@ -46,3 +52,4 @@ exports.clone = function(repo,path,cb){
 	console.log('IN: ' + process.cwd() + ' ' +clone);
 	gitCommandExecute(clone,{},cb)
 }
+require('./git.js').status(function(changes){console.log(changes);});
