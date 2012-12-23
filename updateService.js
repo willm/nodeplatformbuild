@@ -3,7 +3,9 @@ var fs = require('fs'),
 
 exports.update = function(project){
 	process.chdir(project.path);
-	git.status(function(){
-		git.pull();
+	git.status(function(changes){
+		if(changes){
+			git.stash.save();
+		}
 	});
 }

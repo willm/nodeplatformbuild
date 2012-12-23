@@ -37,12 +37,22 @@ describe("update service", function() {
 		expect(fakeGit.status).toHaveBeenCalled();
 	});
 
-	it("should should pull the project if there are changes", function(){
-		spyOn(fakeGit, 'status').andCallFake(function(cb){cb();});
-		spyOn(fakeGit, 'pull');
+	it("should should stash the project if there are changes", function(){
+		spyOn(fakeGit, 'status').andCallFake(function(cb){cb(true);});
+		spyOn(fakeGit.stash, 'save');
 
 		subject.update(project);
 
-		expect(fakeGit.pull).toHaveBeenCalled();
+		expect(fakeGit.stash.save).toHaveBeenCalled();
 	});
+	
+	it("should should not stash the project if there are no changes", function(){
+		spyOn(fakeGit, 'status').andCallFake(function(cb){cb(false);});
+		spyOn(fakeGit.stash, 'save');
+
+		subject.update(project);
+
+		expect(fakeGit.stash.save).not.toHaveBeenCalled();
+	});
+
 });
