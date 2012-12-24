@@ -21,7 +21,7 @@ exports.pull = function(branch, cb){
 }
 
 exports.stash = {
-	push: function(message, cb){
+	save: function(message, cb){
 	var command = 'stash save "' + message + '"'
 		console.log(command);
 		gitCommandExecute(command, {}, cb);
@@ -40,7 +40,11 @@ exports.status = function(cb){
 }
 
 exports.branch = function(cb){
-	gitCommandExecute('branch', {} ,cb);
+	gitCommandExecute('branch', {
+		stdOutParser: function(stdOut){
+			return stdOut.substring(2); 
+		}
+	} ,cb);
 }
 
 exports.checkout = function(path, cb){
@@ -52,4 +56,3 @@ exports.clone = function(repo,path,cb){
 	console.log('IN: ' + process.cwd() + ' ' +clone);
 	gitCommandExecute(clone,{},cb)
 }
-require('./git.js').status(function(changes){console.log(changes);});

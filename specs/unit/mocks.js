@@ -10,7 +10,12 @@ exports.process = {
 exports.git = {
 	pull: function(){},
 	clone: function(){},
-	status: function(){}
+	stash: {
+		save:function(){},	
+		pop:function(){}
+	},
+	status: function(){},
+	branch: function(){},
 };
 
 exports.mkdirp = {
