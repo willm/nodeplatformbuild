@@ -1,8 +1,11 @@
 var fs = require('fs'),
-	git = require('./git');
+	git = require('./git'),
+	path = require('path');
 
 exports.update = function(project){
-	process.chdir(project.path);
+	var startDirectory = process.cwd();
+	process.chdir(path.join(startDirectory, project.path));
+
 	git.branch(function(branch){
 		git.status(function(changes){
 			if(changes){
@@ -16,5 +19,7 @@ exports.update = function(project){
 				git.pull(branch);
 			}
 		});
+
+		process.chdir(startDirectory);
 	});
 }

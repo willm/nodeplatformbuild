@@ -1,4 +1,5 @@
 var rewire = require('rewire'),
+	path = require('path'),
 	mocks = require('./mocks');
 
 describe("update service", function() {
@@ -22,11 +23,13 @@ describe("update service", function() {
 	});
 
 	it("should change to the project's directory", function(){
+		var startDirectory = '/fg/f'
 		spyOn(fakeProcess, 'chdir');
+		spyOn(fakeProcess, 'cwd').andReturn(startDirectory);
 
 		subject.update(project);
 
-		expect(fakeProcess.chdir).toHaveBeenCalledWith(project.path);
+		expect(fakeProcess.chdir).toHaveBeenCalledWith(path.join(startDirectory, project.path));
 	});
 	
 	it("should check which branch the project is on", function(){
@@ -78,7 +81,6 @@ describe("update service", function() {
 		expect(fakeGit.pull).toHaveBeenCalledWith(branch,jasmine.any(Function));
 	});
 	it("should should pop the stash after pulling the project if there are changes", function(){
-
 		var branch = 'wibble';
 		spyOn(fakeGit, 'branch').andCallFake(function(cb){cb(branch);});
 		spyOn(fakeGit, 'status').andCallFake(function(cb){cb(true);});
@@ -101,4 +103,18 @@ describe("update service", function() {
 
 		expect(fakeGit.pull).toHaveBeenCalledWith(branch);
 	});
+
+	it("should change back to the original directory", function(){
+		var startDirectory = '/';
+		spyOn(fakeGit, 'branch').andCallFake(function(cb){cb('wibble');});
+		spyOn(fakeGit, 'status').andCallFake(function(cb){cb(false);});
+		spyOn(fakeGit.stash, 'save').andCallFake(function(cb){cb();});
+		spyOn(fakeGit, 'pull');
+		spyOn(fakeProcess, 'chdir');
+		spyOn(fakeProcess, 'cwd').andReturn(startDirectory);
+
+		subject.update(project);
+
+		expect(fakeProcess.chdir).toHaveBeenCalledWith(startDirectory);
+	})
 });
