@@ -1,4 +1,4 @@
-var fs = require('fs')
+var fs = require('fs'),
 	git = require('./git');
 
 exports.clean = function () {
