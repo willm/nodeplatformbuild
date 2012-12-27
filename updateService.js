@@ -3,7 +3,7 @@ var fs = require('fs'),
 	path = require('path'),
 	color = require('cli-color');
 
-exports.update = function(project){
+exports.update = function(project, cb){
 	var startDirectory = process.cwd();
 	process.chdir(path.join(startDirectory, project.path));
 
@@ -24,5 +24,7 @@ exports.update = function(project){
 		});
 
 		process.chdir(startDirectory);
+		
+		if(cb){cb();};
 	});
 }

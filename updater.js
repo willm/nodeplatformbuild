@@ -3,12 +3,12 @@ var fs = require('fs'),
 	cloner = require('./cloner'),
 	path = require('path');
 
-exports.update = function(project){
+exports.update = function(project, cb){
 	process.cwd();
 	if(!fs.existsSync(path.join(project.path, '.git'))){
-		cloner.clone(project);
+		cloner.clone(project,cb);
 	}
 	else{
-		updateService.update(project);	
+		updateService.update(project,cb);	
 	}
 }

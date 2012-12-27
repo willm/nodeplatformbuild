@@ -36,7 +36,7 @@ describe("updater when project has not been cloned", function() {
 
 		subject.update(project);
 
-		expect(fakeCloner.clone).toHaveBeenCalledWith(project);
+		expect(fakeCloner.clone).toHaveBeenCalledWith(project, undefined);
 	});
 	
 	it("should should not update the project when directory does not exist", function(){

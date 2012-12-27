@@ -2,7 +2,7 @@ var rewire = require('rewire'),
 	mocks = require('./mocks');
 
 describe("updater when project has not been cloned", function() {
-	var fakeMkdirp, fakeGit, subject;
+	var fakeFs, fakeGit, subject;
 
 	var project = {
 		path: 'some/directory',
@@ -10,32 +10,33 @@ describe("updater when project has not been cloned", function() {
 	};
 
 	beforeEach(function(){
-		fakeMkdirp = mocks.mkdirp;
+		fakeFs = mocks.fs;
 		fakeGit = mocks.git;
 
 		subject = rewire('../../cloner');
 		subject.__set__({
 			git : fakeGit,
-			mkdirp : fakeMkdirp
+			fs : fakeFs
 		});
 		
 	})
 
 	it("should create the project's path", function(){
-		spyOn(fakeMkdirp, 'sync');
+		spyOn(fakeFs, 'mkdirp');
 
 		subject.clone(project);
 
-		expect(fakeMkdirp.sync).toHaveBeenCalledWith(project.path);
+		expect(fakeFs.mkdirp).toHaveBeenCalledWith(project.path, jasmine.any(Function));
 
 	});
 
 
 	it("should should clone the project", function(){
+		spyOn(fakeFs, 'mkdirp').andCallFake(function(path, cb){cb();});
 		spyOn(fakeGit, 'clone');
 
 		subject.clone(project);
 
-		expect(fakeGit.clone).toHaveBeenCalledWith(project.gitUrl);
+		expect(fakeGit.clone).toHaveBeenCalledWith(project.gitUrl, project.path, jasmine.any(Function));
 	});
 });

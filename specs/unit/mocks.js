@@ -1,5 +1,6 @@
 exports.fs = {
-	existsSync : function(path){}
+	existsSync : function(path){},
+	mkdirp : function(){}
 };
 
 exports.process = {
