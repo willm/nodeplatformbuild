@@ -18,10 +18,17 @@ var stashPullPop = function (changes, branch) {
 	}
 };
 
+var updateDependencies = function(){
+	//TODO: change this to read from the dependency rule
+	var dependencyPath = "lib";
+	git.checkout(dependencyPath);
+};
+
 exports.update = function (project, cb) {
 	var startDirectory = process.cwd();
 	process.chdir(path.join(startDirectory, project.path));
 
+	updateDependencies();
 	buildDirectoryCleaner.clean();
 
 	git.branch(function (branch) {

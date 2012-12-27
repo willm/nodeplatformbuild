@@ -40,6 +40,15 @@ describe("update service", function() {
 		expect(fakeCleaner.clean).toHaveBeenCalled();
 	});
 	
+	it("should checkout the project's dependencies", function(){
+		var dependencyPath = "lib";
+		spyOn(fakeGit,'checkout');
+
+		subject.update(project);
+
+		expect(fakeGit.checkout).toHaveBeenCalledWith(dependencyPath);
+	});
+
 	it("should check which branch the project is on", function(){
 		spyOn(fakeGit, 'branch');
 
@@ -124,5 +133,5 @@ describe("update service", function() {
 		subject.update(project);
 
 		expect(fakeProcess.chdir).toHaveBeenCalledWith(startDirectory);
-	})
+	});
 });
