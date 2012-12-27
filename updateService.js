@@ -19,6 +19,7 @@ exports.update = function(project, cb){
 				});
 			}
 			else{
+				console.log(color.blue('No local changes'));
 				git.pull(branch);
 			}
 		});

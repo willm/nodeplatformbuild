@@ -19,10 +19,6 @@ exports.git = {
 	branch: function(){},
 };
 
-exports.mkdirp = {
-	sync : function(path){}
-};
-
 exports.cloner = {
 	clone : function(project){}
 };
