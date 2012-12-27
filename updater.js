@@ -3,8 +3,7 @@ var fs = require('fs'),
 	cloner = require('./cloner'),
 	path = require('path');
 
-exports.update = function(project, cb){
-	process.cwd();
+exports.syncProject = function(project, cb){
 	if(!fs.existsSync(path.join(project.path, '.git'))){
 		cloner.clone(project,cb);
 	}

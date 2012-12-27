@@ -28,7 +28,7 @@ describe("updater when project previously been cloned", function() {
 	it("should not clone the project", function(){
 		spyOn(fakeCloner, 'clone');
 
-		subject.update(project);
+		subject.syncProject(project);
 
 		expect(fakeCloner.clone).wasNotCalled();
 
@@ -37,7 +37,7 @@ describe("updater when project previously been cloned", function() {
 	it("should update the project", function(){
 		spyOn(fakeUpdateService, 'update');
 
-		subject.update(project);
+		subject.syncProject(project);
 
 		expect(fakeUpdateService.update).toHaveBeenCalled();	
 	})

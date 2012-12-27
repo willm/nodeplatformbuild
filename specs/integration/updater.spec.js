@@ -19,7 +19,7 @@ describe('updater', function(){
 		};
 
 		runs(function(){
-			subject.update({
+			subject.syncProject({
 				path: 'test',
 				gitUrl: 'git@github.com:willm/WebHelper.git'
 			}, cloneComplete);
