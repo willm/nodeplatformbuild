@@ -12,7 +12,7 @@ describe('updater', function(){
 	afterEach(removeTest);
 
 	it("should clone the repository to the expected path", function(){
-		var subject = require('../../updater.js');
+		var subject = require('../../platform.js');
 		var complete = false;
 		var cloneComplete = function(){
 			complete = true;

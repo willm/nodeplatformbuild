@@ -13,7 +13,7 @@ describe("updater when project has not been cloned", function() {
 		fakeCloner = mocks.cloner;
 		fakeUpdateService = mocks.updateService;
 
-		subject = rewire('../../updater.js');
+		subject = rewire('../../platform.js');
 		subject.__set__({
 			fs: fakeFs,
 			cloner: fakeCloner,
@@ -47,4 +47,23 @@ describe("updater when project has not been cloned", function() {
 
 		expect(fakeUpdateService.update).wasNotCalled();
 	});
+	
+	it("should not clone the project", function(){
+		spyOn(fakeFs,'existsSync').andReturn(true);
+		spyOn(fakeCloner, 'clone');
+
+		subject.syncProject(project);
+
+		expect(fakeCloner.clone).wasNotCalled();
+
+	});
+
+	it("should update the project", function(){
+		spyOn(fakeFs,'existsSync').andReturn(true);
+		spyOn(fakeUpdateService, 'update');
+
+		subject.syncProject(project);
+
+		expect(fakeUpdateService.update).toHaveBeenCalled();	
+	})
 });
