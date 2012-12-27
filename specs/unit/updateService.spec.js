@@ -12,13 +12,15 @@ describe("update service", function() {
 	beforeEach(function(){
 		fakeFs = mocks.fs;
 		fakeGit = mocks.git;
-		fakeProcess = mocks.process;
+		fakeProcess = mocks.process,
+		fakeCleaner = jasmine.createSpyObj('cleaner', ['clean']);
 
 		subject = rewire('../../updateService.js');
 		subject.__set__({
 			fs: fakeFs,
 			git: fakeGit,
-			process: fakeProcess
+			process: fakeProcess,
+			buildDirectoryCleaner: fakeCleaner
 		});
 	});
 
@@ -30,6 +32,12 @@ describe("update service", function() {
 		subject.update(project);
 
 		expect(fakeProcess.chdir).toHaveBeenCalledWith(path.join(startDirectory, project.path));
+	});
+	
+	it("should clean the project's build directory", function(){
+		subject.update(project);
+
+		expect(fakeCleaner.clean).toHaveBeenCalled();
 	});
 	
 	it("should check which branch the project is on", function(){
