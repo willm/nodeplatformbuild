@@ -2,9 +2,11 @@
 	"name" : "nodeplatformBuild",
 	"version" : "0.0.1",
 	"dependencies" : { 
-		"cli-color" : "latest",
-		"mkdirp" : "latest",
-		"gitteh" : "git://github.com/jmendeth/node-gitteh.git",
-		"rewire" : "latest"
+		"cli-color" : "0.2.1",
+		"fs-extra" : "0.3.2",
+		"rewire" : "1.0.3"
+	},
+	"devDependencies": {
+		"jasmine-node": "1.0.26"
 	}
 }
