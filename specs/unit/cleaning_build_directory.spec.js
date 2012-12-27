@@ -3,18 +3,14 @@ var rewire = require('rewire'),
 	path = require('path');
 
 describe('clean build directory', function() {
-	var subject = rewire('../../updater.js'),
-		projectDirectory = 'priject/dir';
+	var subject = rewire('../../buildDirectoryCleaner.js'),
+		projectDirectory = 'project/dir';
 		fakeFs = mocks.fs,
-		fakeUpdateService = mocks.updateService,
-		fakeCloner = mocks.cloner;
 		fakeProcess = mocks.process,
 		fakeGit = mocks.git;
 
 	subject.__set__({
 		fs: fakeFs,
-		updateService: fakeUpdateService,
-		cloner: fakeCloner,
 		process: fakeProcess,
 		git: fakeGit
 	});
@@ -23,7 +19,7 @@ describe('clean build directory', function() {
 		spyOn(fakeFs, 'existsSync').andReturn(false);
 		spyOn(fakeProcess, 'chdir');
 
-		subject.cleanBuildDirectory(projectDirectory);
+		subject.clean(projectDirectory);
 
 		expect(fakeProcess.chdir).not.toHaveBeenCalled();
 	});
@@ -32,7 +28,7 @@ describe('clean build directory', function() {
 		spyOn(fakeFs, 'existsSync').andReturn(true);
 		spyOn(fakeProcess, 'chdir');
 
-		subject.cleanBuildDirectory(projectDirectory);
+		subject.clean(projectDirectory);
 
 		expect(fakeProcess.chdir).toHaveBeenCalledWith('build');
 	});
@@ -42,21 +38,21 @@ describe('clean build directory', function() {
 		spyOn(fakeFs, 'existsSync').andReturn(true);
 		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([]);});
 
-		subject.cleanBuildDirectory(projectDirectory);
+		subject.clean(projectDirectory);
 
 		expect(fakeGit.status).toHaveBeenCalled();
 	});
 
 	it("should checkout modified files", function(){
+		var anotherFileName = 'build/something.js';
+		var fileName = 'build/something.js';
 		spyOn(fakeFs, 'existsSync').andReturn(true);
-		var fileName = 'something.js';
-		var anotherFileName = 'something.js';
 		spyOn(fakeGit, 'status').andCallFake(function(cb){
 			cb([' M ' + fileName, ' M ' + anotherFileName]);
 		});
 		spyOn(fakeGit, 'checkout');
 
-		subject.cleanBuildDirectory(projectDirectory);
+		subject.clean(projectDirectory);
 
 		expect(fakeGit.checkout).toHaveBeenCalledWith(fileName);
 		expect(fakeGit.checkout).toHaveBeenCalledWith(anotherFileName);
@@ -65,31 +61,31 @@ describe('clean build directory', function() {
 
 	it("should not checkout unmodified files", function(){
 		spyOn(fakeFs, 'existsSync').andReturn(true);
-		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([" ? change.js"]);});
+		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([" ? build/change.js"]);});
 		spyOn(fakeGit, 'checkout');
 
-		subject.cleanBuildDirectory(projectDirectory);
+		subject.clean(projectDirectory);
 
 		expect(fakeGit.checkout).not.toHaveBeenCalled();
 	});
 	
 	it("should not checkout Build.cmd", function(){
 		spyOn(fakeFs, 'existsSync').andReturn(true);
-		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([" M Build.cmd"]);});
+		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([" M build/Build.cmd"]);});
 		spyOn(fakeGit, 'checkout');
 
-		subject.cleanBuildDirectory(projectDirectory);
+		subject.clean(projectDirectory);
 
 		expect(fakeGit.checkout).not.toHaveBeenCalled();
 	});
 
-	it("should not checkout files in directories above", function(){
+	it("should not checkout files in directories not in build folder", function(){
 		spyOn(fakeFs, 'existsSync').andReturn(true);
 
-		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([" M ../somefile.js"]);});
+		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([" M somefile.js"]);});
 		spyOn(fakeGit, 'checkout');
 
-		subject.cleanBuildDirectory(projectDirectory);
+		subject.clean(projectDirectory);
 
 		expect(fakeGit.checkout).not.toHaveBeenCalled();
 	});
