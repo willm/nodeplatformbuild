@@ -17,6 +17,7 @@ exports.git = {
 	},
 	status: function(){},
 	branch: function(){},
+	checkout: function(){}
 };
 
 exports.cloner = {
