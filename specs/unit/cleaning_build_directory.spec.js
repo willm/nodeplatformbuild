@@ -24,16 +24,6 @@ describe('clean build directory', function() {
 		expect(fakeProcess.chdir).not.toHaveBeenCalled();
 	});
 
-	it("should change to the build directory", function(){
-		spyOn(fakeFs, 'existsSync').andReturn(true);
-		spyOn(fakeProcess, 'chdir');
-
-		subject.clean(projectDirectory);
-
-		expect(fakeProcess.chdir).toHaveBeenCalledWith('build');
-	});
-
-	
 	it("should check for changes", function(){
 		spyOn(fakeFs, 'existsSync').andReturn(true);
 		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([]);});
