@@ -51,7 +51,7 @@ describe("update service", function() {
 
 	it("should should stash the project if there are changes", function(){
 		spyOn(fakeGit, 'branch').andCallFake(function(cb){cb();});
-		spyOn(fakeGit, 'status').andCallFake(function(cb){cb(true);});
+		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([" M something.js"]);});
 		spyOn(fakeGit.stash, 'save');
 
 		subject.update(project);
@@ -61,7 +61,7 @@ describe("update service", function() {
 	
 	it("should should not stash the project if there are no changes", function(){
 		spyOn(fakeGit, 'branch').andCallFake(function(cb){cb();});
-		spyOn(fakeGit, 'status').andCallFake(function(cb){cb(false);});
+		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([]);});
 		spyOn(fakeGit.stash, 'save');
 
 		subject.update(project);
@@ -72,7 +72,7 @@ describe("update service", function() {
 	it("should should pull the project from the current branch if there are changes", function(){
 		var branch = 'wibble';
 		spyOn(fakeGit, 'branch').andCallFake(function(cb){cb(branch);});
-		spyOn(fakeGit, 'status').andCallFake(function(cb){cb(true);});
+		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([" M something.js"]);});
 		spyOn(fakeGit.stash, 'save').andCallFake(function(cb){cb();});
 		spyOn(fakeGit, 'pull');
 
@@ -83,7 +83,7 @@ describe("update service", function() {
 	it("should should pop the stash after pulling the project if there are changes", function(){
 		var branch = 'wibble';
 		spyOn(fakeGit, 'branch').andCallFake(function(cb){cb(branch);});
-		spyOn(fakeGit, 'status').andCallFake(function(cb){cb(true);});
+		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([" M something.js"]);});
 		spyOn(fakeGit.stash, 'save').andCallFake(function(cb){cb();});
 		spyOn(fakeGit, 'pull').andCallFake(function(branch,cb){cb();});
 		spyOn(fakeGit.stash, 'pop');
@@ -95,7 +95,7 @@ describe("update service", function() {
 	it("should pull from the current branch if there are no changes",function(){
 		var branch = 'wibble';
 		spyOn(fakeGit, 'branch').andCallFake(function(cb){cb(branch);});
-		spyOn(fakeGit, 'status').andCallFake(function(cb){cb(false);});
+		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([]);});
 		spyOn(fakeGit.stash, 'save').andCallFake(function(cb){cb();});
 		spyOn(fakeGit, 'pull');
 
@@ -107,7 +107,7 @@ describe("update service", function() {
 	it("should change back to the original directory", function(){
 		var startDirectory = '/';
 		spyOn(fakeGit, 'branch').andCallFake(function(cb){cb('wibble');});
-		spyOn(fakeGit, 'status').andCallFake(function(cb){cb(false);});
+		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([]);});
 		spyOn(fakeGit.stash, 'save').andCallFake(function(cb){cb();});
 		spyOn(fakeGit, 'pull');
 		spyOn(fakeProcess, 'chdir');

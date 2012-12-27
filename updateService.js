@@ -10,7 +10,7 @@ exports.update = function(project, cb){
 	git.branch(function(branch){
 		console.log(color.cyan("Updating " + startDirectory + " to latest " + branch));
 		git.status(function(changes){
-			if(changes){
+			if(changes.length !== 0){
 				git.stash.save(function(){
 				console.log(color.blue('Changes will be stashed and re-applied'));
 					git.pull(branch, function(){

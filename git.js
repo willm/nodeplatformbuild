@@ -34,7 +34,7 @@ exports.status = function(cb){
 	gitCommandExecute('status -s',{
 		print: false, 
 		stdOutParser:function(stdOut){
-			return stdOut !== '';
+			return stdOut.split('\n');
 		}
 	} ,cb);
 }
