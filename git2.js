@@ -10,8 +10,9 @@ Git.prototype.gitCommandExecute = function(command, opt ,cb){
 	opt = opt || {};
 	opt.print = opt.print!==false ;
 	opt.stdOutParser = opt.stdOutParser || function(stdOut){return stdOut} ;
+	opt.path = opt.path || this.repoPath;
 
-	exec('git ' + command, {cwd: this.repoPath} ,function(err, stout, sterr){
+	exec('git ' + command, {cwd: opt.path} ,function(err, stout, sterr){
 		if(sterr) console.log(color.red('STERR: ' + sterr));
 		if(err) console.log(color.red('Err: ' + err));
 		if(stout && opt.print) console.log('Standard output: ' + stout);
@@ -57,10 +58,11 @@ Git.prototype.checkout = function(repoPath, cb){
 }
 
 exports.clone = function(repo,repoPath,cb){
-	var clone = 'clone ' + repo;
-	var git = new Git(path.join(process.cwd(),repoPath));
+	var clone = 'clone ' + repo + ' ' + repoPath;
+	var git = new Git(process.cwd(),repoPath);
+	console.log(path.join(process.cwd(),repoPath));
 	console.log('cloning:  ' + clone);
-	git.gitCommandExecute(clone,{},cb);
+	git.gitCommandExecute(clone,{path: repoPath},cb);
 	return git;
 }
 
