@@ -43,6 +43,6 @@ describe("git", function(){
 			repoPath = 'a/path',
 			clonned = subject.clone(gitUrl, repoPath);
 		
-		expect(fakeExec).toHaveBeenCalledWith("git clone " + gitUrl + " " + repoPath, {cwd: repoPath}, jasmine.any(Function));
+		expect(fakeExec).toHaveBeenCalledWith("git clone " + gitUrl + " " + repoPath, {cwd: currentDir}, jasmine.any(Function));
 	});
 });

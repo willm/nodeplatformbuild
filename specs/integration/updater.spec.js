@@ -2,7 +2,7 @@ var fs = require('fs-extra'),
 	path = require('path'),
 	testDirectory = path.join(process.cwd(),'test');
 
-describe('updater', function(){
+describe('platform', function(){
 	var removeTest = function(){
 		fs.removeSync(testDirectory);
 	};

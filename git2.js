@@ -60,10 +60,13 @@ Git.prototype.checkout = function(repoPath, cb){
 
 exports.clone = function(repo,repoPath,cb){
 	var clone = 'clone ' + repo + ' ' + repoPath;
-	var git = new Git(process.cwd(),repoPath);
+	var git = new Git(path.join(process.cwd(),repoPath));
+
 	console.log(path.join(process.cwd(),repoPath));
 	console.log('cloning:  ' + clone);
-	git.gitCommandExecute(clone,{path: repoPath},cb);
+	console.log(repoPath);
+
+	git.gitCommandExecute(clone,{path: process.cwd()},cb);
 	return git;
 }
 
