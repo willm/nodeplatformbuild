@@ -1,8 +1,9 @@
 var exec = require('child_process').exec,
-	color = require('cli-color');
+	color = require('cli-color'),
+	path = require('path');
 
-var Git = function(path){
-	this.repoPath = path;
+var Git = function(repoPath){
+	this.repoPath = repoPath;
 };
 
 Git.prototype.gitCommandExecute = function(command, opt ,cb){
@@ -51,17 +52,19 @@ Git.prototype.branch = function(cb){
 	} ,cb);
 }
 
-Git.prototype.checkout = function(path, cb){
-	gitCommandExecute('checkout ' + path, {},cb);
+Git.prototype.checkout = function(repoPath, cb){
+	gitCommandExecute('checkout ' + repoPath, {},cb);
 }
 
-Git.prototype.clone = function(repo,path,cb){
-	var clone = 'clone ' + repo + ' ' + path;
-	console.log('IN: ' + process.cwd() + ' ' +clone);
-	gitCommandExecute(clone,{},cb)
+exports.clone = function(repo,repoPath,cb){
+	var clone = 'clone ' + repo;
+	var git = new Git(path.join(process.cwd(),repoPath));
+	console.log('cloning:  ' + clone);
+	git.gitCommandExecute(clone,{},cb);
+	return git;
 }
 
-exports.open = function(path){
-	return new Git(path);
+exports.open = function(repoPath){
+	return new Git(path.join(process.cwd(),repoPath));
 };
 
