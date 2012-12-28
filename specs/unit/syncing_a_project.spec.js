@@ -2,7 +2,7 @@ var rewire = require('rewire'),
 	mocks = require('./mocks');
 
 describe("updater when project has not been cloned", function() {
-	var fakeFs, fakeCloner, fakeUpdateService, subject;
+	var fakeFs, fakeCloner, fakeUpdateService, subject, fakeGit;
 
 	var project = {
 		path: 'some/directory'
@@ -12,9 +12,14 @@ describe("updater when project has not been cloned", function() {
 		fakeFs = mocks.fs;
 		fakeCloner = mocks.cloner;
 		fakeUpdateService = mocks.updateService;
+		fakeGit = jasmine.createSpyObj('git', ['open']),
+		fakeRepo = {};
 
 		subject = rewire('../../project.js');
+
+		fakeGit.open.andReturn(fakeRepo);
 		subject.__set__({
+			git: fakeGit,
 			fs: fakeFs,
 			cloner: fakeCloner,
 			updateService: fakeUpdateService
@@ -64,6 +69,6 @@ describe("updater when project has not been cloned", function() {
 
 		subject.syncProject(project);
 
-		expect(fakeUpdateService.update).toHaveBeenCalled();	
-	})
+		expect(fakeUpdateService.update).toHaveBeenCalledWith(fakeRepo, undefined);
+	});
 });
