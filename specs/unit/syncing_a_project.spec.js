@@ -13,7 +13,7 @@ describe("updater when project has not been cloned", function() {
 		fakeCloner = mocks.cloner;
 		fakeUpdateService = mocks.updateService;
 
-		subject = rewire('../../platform.js');
+		subject = rewire('../../project.js');
 		subject.__set__({
 			fs: fakeFs,
 			cloner: fakeCloner,
