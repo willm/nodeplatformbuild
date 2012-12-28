@@ -1,4 +1,4 @@
-var git = require('../../git2.js'),
+var git = require('../../git.js'),
 	path = require('path'),
 	fs = require('fs-extra');
 

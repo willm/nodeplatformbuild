@@ -1,4 +1,4 @@
-var git = require('./git2'),
+var git = require('./git'),
 	fs = require('fs-extra');
 
 exports.clone = function (project, cb) {

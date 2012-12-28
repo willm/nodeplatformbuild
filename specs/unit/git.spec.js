@@ -2,7 +2,7 @@ var rewire = require('rewire'),
 	path = require('path');
 
 describe("git", function(){
-	var subject = rewire('../../git2'),
+	var subject,
 		fakeExec,
 		fakeProcess = jasmine.createSpyObj('process',['cwd']),
 		currentDir = '/blah',
@@ -12,7 +12,7 @@ describe("git", function(){
 
 	beforeEach(function(){
 		fakeExec = jasmine.createSpy(),
-		subject = rewire('../../git2');
+		subject = rewire('../../git');
 		subject.__set__({
 			exec: fakeExec,
 			process: fakeProcess
