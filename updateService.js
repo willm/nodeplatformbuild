@@ -1,43 +1,37 @@
 var fs = require('fs'),
-	git = require('./git'),
 	path = require('path'),
 	color = require('cli-color'),
 	buildDirectoryCleaner = require('./buildDirectoryCleaner');
 
-var stashPullPop = function (changes, branch) {
+var stashPullPop = function (changes, branch, repo) {
 	if (changes.length !== 0) {
-		git.stash.save(function () {
+		repo.stash.save(function () {
 			console.log(color.blue('Changes will be stashed and re-applied'));
-			git.pull(branch, function () {
-				git.stash.pop();
+			repo.pull(branch, function () {
+				repo.stash.pop();
 			});
 		});
 	} else {
 		console.log(color.blue('No local changes'));
-		git.pull(branch);
+		repo.pull(branch);
 	}
 };
 
-var updateDependencies = function(){
+var updateDependencies = function(repo){
 	//TODO: change this to read from the dependency rule
 	var dependencyPath = "lib";
-	git.checkout(dependencyPath);
+	repo.checkout(dependencyPath);
 };
 
-exports.update = function (project, cb) {
-	var startDirectory = process.cwd();
-	process.chdir(path.join(startDirectory, project.path));
+exports.update = function (repo, cb) {
+	updateDependencies(repo);
+	buildDirectoryCleaner.clean(repo);
 
-	updateDependencies();
-	buildDirectoryCleaner.clean();
-
-	git.branch(function (branch) {
-		console.log(color.cyan("Updating " + startDirectory + " to latest " + branch));
-		git.status(function(changes){
-			stashPullPop(changes, branch);
+	repo.branch(function (branch) {
+		console.log(color.cyan("Updating " + repo.repoPath  + " to latest " + branch));
+		repo.status(function(changes){
+			stashPullPop(changes, branch, repo);
 		});
-
-		process.chdir(startDirectory);
 
 		if (cb) {
 			cb();

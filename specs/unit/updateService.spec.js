@@ -3,7 +3,7 @@ var rewire = require('rewire'),
 	mocks = require('./mocks');
 
 describe("update service", function() {
-	var fakeFs, fakeGit, fakeProcess, subject;
+	var fakeFs, fakeRepo, subject;
 
 	var project = {
 		path: 'some/directory'
@@ -11,127 +11,92 @@ describe("update service", function() {
 
 	beforeEach(function(){
 		fakeFs = mocks.fs;
-		fakeGit = mocks.git;
-		fakeProcess = mocks.process,
-		fakeCleaner = jasmine.createSpyObj('cleaner', ['clean']);
+		fakeCleaner = jasmine.createSpyObj('cleaner', ['clean']),
+		fakeRepo = jasmine.createSpyObj('repo', ['checkout', 'branch', 'status', 'pull']);
+		fakeRepo.stash = jasmine.createSpyObj('stash', ['save','pop']);
 
 		subject = rewire('../../updateService.js');
 		subject.__set__({
 			fs: fakeFs,
-			git: fakeGit,
-			process: fakeProcess,
 			buildDirectoryCleaner: fakeCleaner
 		});
 	});
 
-	it("should change to the project's directory", function(){
-		var startDirectory = '/fg/f'
-		spyOn(fakeProcess, 'chdir');
-		spyOn(fakeProcess, 'cwd').andReturn(startDirectory);
-
-		subject.update(project);
-
-		expect(fakeProcess.chdir).toHaveBeenCalledWith(path.join(startDirectory, project.path));
-	});
-	
 	it("should clean the project's build directory", function(){
-		subject.update(project);
+		subject.update(fakeRepo);
 
-		expect(fakeCleaner.clean).toHaveBeenCalled();
+		expect(fakeCleaner.clean).toHaveBeenCalledWith(fakeRepo);
 	});
 	
 	it("should checkout the project's dependencies", function(){
 		var dependencyPath = "lib";
-		spyOn(fakeGit,'checkout');
 
-		subject.update(project);
+		subject.update(fakeRepo);
 
-		expect(fakeGit.checkout).toHaveBeenCalledWith(dependencyPath);
+		expect(fakeRepo.checkout).toHaveBeenCalledWith(dependencyPath);
 	});
 
 	it("should check which branch the project is on", function(){
-		spyOn(fakeGit, 'branch');
+		subject.update(fakeRepo);
 
-		subject.update(project);
-
-		expect(fakeGit.branch).toHaveBeenCalled();
+		expect(fakeRepo.branch).toHaveBeenCalled();
 	});
 
 	it("should check if there are any changes", function(){
-		spyOn(fakeGit, 'branch').andCallFake(function(cb){cb();});
-		spyOn(fakeGit, 'status');
+		fakeRepo.branch.andCallFake(function(cb){cb();});
 
-		subject.update(project);
+		subject.update(fakeRepo);
 
-		expect(fakeGit.status).toHaveBeenCalled();
+		expect(fakeRepo.status).toHaveBeenCalled();
 	});
 
 	it("should should stash the project if there are changes", function(){
-		spyOn(fakeGit, 'branch').andCallFake(function(cb){cb();});
-		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([" M something.js"]);});
-		spyOn(fakeGit.stash, 'save');
+		fakeRepo.branch.andCallFake(function(cb){cb();});
+		fakeRepo.status.andCallFake(function(cb){cb([" M something.js"]);});
 
-		subject.update(project);
+		subject.update(fakeRepo);
 
-		expect(fakeGit.stash.save).toHaveBeenCalled();
+		expect(fakeRepo.stash.save).toHaveBeenCalled();
 	});
 	
 	it("should should not stash the project if there are no changes", function(){
-		spyOn(fakeGit, 'branch').andCallFake(function(cb){cb();});
-		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([]);});
-		spyOn(fakeGit.stash, 'save');
+		fakeRepo.branch.andCallFake(function(cb){cb();});
+		fakeRepo.status.andCallFake(function(cb){cb([]);});
 
-		subject.update(project);
+		subject.update(fakeRepo);
 
-		expect(fakeGit.stash.save).not.toHaveBeenCalled();
+		expect(fakeRepo.stash.save).not.toHaveBeenCalled();
 	});
 
 	it("should should pull the project from the current branch if there are changes", function(){
 		var branch = 'wibble';
-		spyOn(fakeGit, 'branch').andCallFake(function(cb){cb(branch);});
-		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([" M something.js"]);});
-		spyOn(fakeGit.stash, 'save').andCallFake(function(cb){cb();});
-		spyOn(fakeGit, 'pull');
+		fakeRepo.branch.andCallFake(function(cb){cb(branch);});
+		fakeRepo.status.andCallFake(function(cb){cb([" M something.js"]);});
+		fakeRepo.stash.save.andCallFake(function(cb){cb();});
 
-		subject.update(project);
+		subject.update(fakeRepo);
 
-		expect(fakeGit.pull).toHaveBeenCalledWith(branch,jasmine.any(Function));
+		expect(fakeRepo.pull).toHaveBeenCalledWith(branch,jasmine.any(Function));
 	});
 	it("should should pop the stash after pulling the project if there are changes", function(){
 		var branch = 'wibble';
-		spyOn(fakeGit, 'branch').andCallFake(function(cb){cb(branch);});
-		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([" M something.js"]);});
-		spyOn(fakeGit.stash, 'save').andCallFake(function(cb){cb();});
-		spyOn(fakeGit, 'pull').andCallFake(function(branch,cb){cb();});
-		spyOn(fakeGit.stash, 'pop');
+		fakeRepo.branch.andCallFake(function(cb){cb(branch);});
+		fakeRepo.status.andCallFake(function(cb){cb([" M something.js"]);});
+		fakeRepo.stash.save.andCallFake(function(cb){cb();});
+		fakeRepo.pull.andCallFake(function(branch,cb){cb();});
 
-		subject.update(project);
+		subject.update(fakeRepo);
 
-		expect(fakeGit.stash.pop).toHaveBeenCalled();
+		expect(fakeRepo.stash.pop).toHaveBeenCalled();
 	});
 	it("should pull from the current branch if there are no changes",function(){
 		var branch = 'wibble';
-		spyOn(fakeGit, 'branch').andCallFake(function(cb){cb(branch);});
-		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([]);});
-		spyOn(fakeGit.stash, 'save').andCallFake(function(cb){cb();});
-		spyOn(fakeGit, 'pull');
+		fakeRepo.branch.andCallFake(function(cb){cb(branch);});
+		fakeRepo.status.andCallFake(function(cb){cb([]);});
+		fakeRepo.stash.save.andCallFake(function(cb){cb();});
 
-		subject.update(project);
+		subject.update(fakeRepo);
 
-		expect(fakeGit.pull).toHaveBeenCalledWith(branch);
-	});
-
-	it("should change back to the original directory", function(){
-		var startDirectory = '/';
-		spyOn(fakeGit, 'branch').andCallFake(function(cb){cb('wibble');});
-		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([]);});
-		spyOn(fakeGit.stash, 'save').andCallFake(function(cb){cb();});
-		spyOn(fakeGit, 'pull');
-		spyOn(fakeProcess, 'chdir');
-		spyOn(fakeProcess, 'cwd').andReturn(startDirectory);
-
-		subject.update(project);
-
-		expect(fakeProcess.chdir).toHaveBeenCalledWith(startDirectory);
+		expect(fakeRepo.pull).toHaveBeenCalledWith(branch);
 	});
 });
