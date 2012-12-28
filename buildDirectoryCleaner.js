@@ -1,15 +1,15 @@
-var fs = require('fs'),
-	git = require('./git');
+var path = require('path'),
+	fs = require('fs');
 
-exports.clean = function () {
+exports.clean = function (repo) {
 	var buildDirectory = 'build';
-	if(!fs.existsSync(buildDirectory)){
+	if(!fs.existsSync(path.join(repo.repoPath,buildDirectory))){
 		return;
 	}	
-	git.status(function(changes){
+	repo.status(function(changes){
 		changes.forEach(function(change){
 			if(change.indexOf(' M build/') === 0 && change.indexOf('build/Build.cmd') === -1){
-				git.checkout(change.substring(3));
+				repo.checkout(change.substring(3));
 			}
 		});
 	});

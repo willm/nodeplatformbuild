@@ -4,80 +4,75 @@ var rewire = require('rewire'),
 
 describe('clean build directory', function() {
 	var subject = rewire('../../buildDirectoryCleaner.js'),
-		projectDirectory = 'project/dir';
+		projectDirectory = 'project/dir',
 		fakeFs = mocks.fs,
-		fakeProcess = mocks.process,
-		fakeGit = mocks.git;
+		fakeRepo;
 
 	subject.__set__({
-		fs: fakeFs,
-		process: fakeProcess,
-		git: fakeGit
+		fs: fakeFs
+	});
+
+	beforeEach(function(){
+		fakeRepo = jasmine.createSpyObj('repo', ['status','checkout','repoPath']);
+		fakeRepo.repoPath.andReturn('/bla/');
 	});
 
 	it("should return if build directory does not exist", function(){
 		spyOn(fakeFs, 'existsSync').andReturn(false);
-		spyOn(fakeProcess, 'chdir');
+		subject.clean(fakeRepo);
 
-		subject.clean(projectDirectory);
-
-		expect(fakeProcess.chdir).not.toHaveBeenCalled();
+		expect(fakeRepo.status).not.toHaveBeenCalled();
 	});
 
 	it("should check for changes", function(){
 		spyOn(fakeFs, 'existsSync').andReturn(true);
-		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([]);});
 
-		subject.clean(projectDirectory);
+		subject.clean(fakeRepo);
 
-		expect(fakeGit.status).toHaveBeenCalled();
+		expect(fakeRepo.status).toHaveBeenCalled();
 	});
 
 	it("should checkout modified files", function(){
 		var anotherFileName = 'build/something.js';
 		var fileName = 'build/something.js';
 		spyOn(fakeFs, 'existsSync').andReturn(true);
-		spyOn(fakeGit, 'status').andCallFake(function(cb){
+		fakeRepo.status.andCallFake(function(cb){
 			cb([' M ' + fileName, ' M ' + anotherFileName]);
 		});
-		spyOn(fakeGit, 'checkout');
 
-		subject.clean(projectDirectory);
+		subject.clean(fakeRepo);
 
-		expect(fakeGit.checkout).toHaveBeenCalledWith(fileName);
-		expect(fakeGit.checkout).toHaveBeenCalledWith(anotherFileName);
+		expect(fakeRepo.checkout).toHaveBeenCalledWith(fileName);
+		expect(fakeRepo.checkout).toHaveBeenCalledWith(anotherFileName);
 	});
 
 
 	it("should not checkout unmodified files", function(){
 		spyOn(fakeFs, 'existsSync').andReturn(true);
-		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([" ? build/change.js"]);});
-		spyOn(fakeGit, 'checkout');
+		fakeRepo.status.andCallFake(function(cb){cb([" ? build/change.js"]);});
 
-		subject.clean(projectDirectory);
+		subject.clean(fakeRepo);
 
-		expect(fakeGit.checkout).not.toHaveBeenCalled();
+		expect(fakeRepo.checkout).not.toHaveBeenCalled();
 	});
 	
 	it("should not checkout Build.cmd", function(){
 		spyOn(fakeFs, 'existsSync').andReturn(true);
-		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([" M build/Build.cmd"]);});
-		spyOn(fakeGit, 'checkout');
+		fakeRepo.status.andCallFake(function(cb){cb([" M build/Build.cmd"]);});
 
-		subject.clean(projectDirectory);
+		subject.clean(fakeRepo);
 
-		expect(fakeGit.checkout).not.toHaveBeenCalled();
+		expect(fakeRepo.checkout).not.toHaveBeenCalled();
 	});
 
 	it("should not checkout files in directories not in build folder", function(){
 		spyOn(fakeFs, 'existsSync').andReturn(true);
 
-		spyOn(fakeGit, 'status').andCallFake(function(cb){cb([" M somefile.js"]);});
-		spyOn(fakeGit, 'checkout');
+		fakeRepo.status.andCallFake(function(cb){cb([" M somefile.js"]);});
 
-		subject.clean(projectDirectory);
+		subject.clean(fakeRepo);
 
-		expect(fakeGit.checkout).not.toHaveBeenCalled();
+		expect(fakeRepo.checkout).not.toHaveBeenCalled();
 	});
 
 });
