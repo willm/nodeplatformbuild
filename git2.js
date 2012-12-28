@@ -5,7 +5,7 @@ var Git = function(path){
 	this.repoPath = path;
 };
 
-var gitCommandExecute = function(command, opt ,cb){
+Git.prototype.gitCommandExecute = function(command, opt ,cb){
 	opt = opt || {};
 	opt.print = opt.print!==false ;
 	opt.stdOutParser = opt.stdOutParser || function(stdOut){return stdOut} ;
@@ -21,10 +21,10 @@ var gitCommandExecute = function(command, opt ,cb){
 Git.prototype.pull = function(branch, cb){
 	var command = 'pull -q --recurse-submodules=yes -Xtheirs origin ' + branch;
 	console.log('in dir ' +process.cwd()+' ' + command);
-	gitCommandExecute(command,{} ,cb);
+	this.gitCommandExecute(command,{} ,cb);
 }
 
-exports.stash = {
+Git.prototype.stash = {
 	save: function(message, cb){
 	var command = 'stash save "' + message + '"'
 		console.log(command);
@@ -33,8 +33,8 @@ exports.stash = {
 	pop: function(cb){
 		gitCommandExecute('stash pop', {}, cb);
 	}
-}
-exports.status = function(cb){
+};
+Git.prototype.status = function(cb){
 	gitCommandExecute('status -s',{
 		print: false, 
 		stdOutParser:function(stdOut){
@@ -43,7 +43,7 @@ exports.status = function(cb){
 	} ,cb);
 }
 
-exports.branch = function(cb){
+Git.prototype.branch = function(cb){
 	gitCommandExecute('branch', {
 		stdOutParser: function(stdOut){
 			return stdOut.substring(2); 
@@ -51,11 +51,11 @@ exports.branch = function(cb){
 	} ,cb);
 }
 
-exports.checkout = function(path, cb){
+Git.prototype.checkout = function(path, cb){
 	gitCommandExecute('checkout ' + path, {},cb);
 }
 
-exports.clone = function(repo,path,cb){
+Git.prototype.clone = function(repo,path,cb){
 	var clone = 'clone ' + repo + ' ' + path;
 	console.log('IN: ' + process.cwd() + ' ' +clone);
 	gitCommandExecute(clone,{},cb)
