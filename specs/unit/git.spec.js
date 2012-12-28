@@ -3,28 +3,36 @@ var rewire = require('rewire'),
 
 describe("git", function(){
 	var subject = rewire('../../git2'),
-		fakeExec = jasmine.createSpy(),
+		fakeExec,
 		fakeProcess = jasmine.createSpyObj('process',['cwd']),
 		currentDir = '/blah',
 		repoPath = "/some/path/to/a/repo",
-		git;
+		git,
+		subject;
 
-	fakeProcess.cwd.andReturn(currentDir);
-	subject.__set__({
-		exec: fakeExec,
-		process: fakeProcess
+	beforeEach(function(){
+		fakeExec = jasmine.createSpy(),
+		subject = rewire('../../git2');
+		subject.__set__({
+			exec: fakeExec,
+			process: fakeProcess
+		});
 	});
 
-	git = subject.open(repoPath);
+	fakeProcess.cwd.andReturn(currentDir);
+
 
 	it("should open a new repo every time", function(){
 		var pathB = "/some/path/to/a/repo";
 		var gitB = subject.open(pathB);
+		git = subject.open(repoPath);
 
 		expect(git).not.toBe(gitB);
 	});
 
 	it("should execute commands with correct repo path",function(){
+		git = subject.open(repoPath);
+
 		git.pull('branch');
 
 		expect(fakeExec).toHaveBeenCalledWith(jasmine.any(String), {cwd:path.join(currentDir,repoPath)}, jasmine.any(Function));
@@ -35,6 +43,6 @@ describe("git", function(){
 			repoPath = 'a/path',
 			clonned = subject.clone(gitUrl, repoPath);
 		
-		expect(fakeExec).toHaveBeenCalledWith("git clone " + gitUrl, {cwd:path.join(currentDir,repoPath)}, jasmine.any(Function));
+		expect(fakeExec).toHaveBeenCalledWith("git clone " + gitUrl + " " + repoPath, {cwd: repoPath}, jasmine.any(Function));
 	});
 });

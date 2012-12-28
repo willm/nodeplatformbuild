@@ -1,6 +1,7 @@
 var exec = require('child_process').exec,
 	color = require('cli-color'),
-	path = require('path');
+	path = require('path'),
+	os = require ('os');
 
 var Git = function(repoPath){
 	this.repoPath = repoPath;
@@ -40,7 +41,7 @@ Git.prototype.status = function(cb){
 	gitCommandExecute('status -s',{
 		print: false, 
 		stdOutParser:function(stdOut){
-			return stdOut.split('\n');
+			return stdOut.split(os.EOL);
 		}
 	} ,cb);
 }
