@@ -6,19 +6,30 @@ describe('clean build directory', function() {
 	var subject = rewire('../../buildDirectoryCleaner.js'),
 		projectDirectory = 'project/dir',
 		fakeFs = mocks.fs,
-		fakeRepo;
+		fakeRepo,
+		repoPath;
 
 	subject.__set__({
 		fs: fakeFs
 	});
 
 	beforeEach(function(){
-		fakeRepo = jasmine.createSpyObj('repo', ['status','checkout','repoPath']);
-		fakeRepo.repoPath.andReturn('/bla/');
+		repoPath = '/bla/';
+		fakeRepo = jasmine.createSpyObj('repo', ['status','checkout']);
+		fakeRepo.repoPath = repoPath;
+	});
+
+	it("should check whether the build folder exists", function(){
+		spyOn(fakeFs, 'existsSync');
+
+		subject.clean(fakeRepo);
+
+		expect(fakeFs.existsSync).toHaveBeenCalledWith(path.join(repoPath, 'build'));
 	});
 
 	it("should return if build directory does not exist", function(){
 		spyOn(fakeFs, 'existsSync').andReturn(false);
+
 		subject.clean(fakeRepo);
 
 		expect(fakeRepo.status).not.toHaveBeenCalled();
