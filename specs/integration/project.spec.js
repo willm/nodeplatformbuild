@@ -12,17 +12,15 @@ describe('platform', function(){
 	afterEach(removeTest);
 
 	it("should clone the repository to the expected path", function(){
-		var subject = require('../../project.js');
+		var Project = require('../../project.js');
+		var subject = new Project('test', 'git@github.com:willm/WebHelper.git');
 		var complete = false;
 		var cloneComplete = function(){
 			complete = true;
 		};
 
 		runs(function(){
-			subject.sync({
-				path: 'test',
-				gitUrl: 'git@github.com:willm/WebHelper.git'
-			}, cloneComplete);
+			subject.sync(cloneComplete);
 		});
 
 		waitsFor(function(){

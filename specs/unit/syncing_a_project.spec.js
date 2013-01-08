@@ -4,51 +4,48 @@ var rewire = require('rewire'),
 describe("updater when project has not been cloned", function() {
 	var fakeFs, fakeCloner, fakeUpdateService, subject, fakeGit;
 
-	var project = {
-		path: 'some/directory'
-	};
-
 	beforeEach(function(){
 		fakeFs = mocks.fs;
 		fakeCloner = mocks.cloner;
 		fakeUpdateService = mocks.updateService;
 		fakeGit = jasmine.createSpyObj('git', ['open']),
-		fakeRepo = {};
+		fakeRepo = {},
 
-		subject = rewire('../../project.js');
+		Project = rewire('../../project.js');
 
 		fakeGit.open.andReturn(fakeRepo);
-		subject.__set__({
+		Project.__set__({
 			git: fakeGit,
 			fs: fakeFs,
 			cloner: fakeCloner,
 			updateService: fakeUpdateService
 		});
 		
+		subject = new Project('some/directory', 'git@yomamam.com/git');
 	})
 
 	it("should check if git the directory exists", function() {
 		spyOn(fakeFs,'existsSync');
 
-		subject.sync(project);
+		subject.sync();
 
-		expect(fakeFs.existsSync).toHaveBeenCalledWith(project.path + '/.git');
+		expect(fakeFs.existsSync).toHaveBeenCalledWith(subject.path + '/.git');
 	});
 
 	it("should should clone the project if directory does not exit", function(){
 		spyOn(fakeFs,'existsSync').andReturn(false);
 		spyOn(fakeCloner, 'clone');
 
-		subject.sync(project);
+		subject.sync();
 
-		expect(fakeCloner.clone).toHaveBeenCalledWith(project, undefined);
+		expect(fakeCloner.clone).toHaveBeenCalledWith(subject, undefined);
 	});
 	
 	it("should should not update the project when directory does not exist", function(){
 		spyOn(fakeFs,'existsSync').andReturn(false);
 		spyOn(fakeUpdateService, 'update');
 
-		subject.sync(project);
+		subject.sync();
 
 		expect(fakeUpdateService.update).wasNotCalled();
 	});
@@ -57,7 +54,7 @@ describe("updater when project has not been cloned", function() {
 		spyOn(fakeFs,'existsSync').andReturn(true);
 		spyOn(fakeCloner, 'clone');
 
-		subject.sync(project);
+		subject.sync();
 
 		expect(fakeCloner.clone).wasNotCalled();
 
@@ -67,7 +64,7 @@ describe("updater when project has not been cloned", function() {
 		spyOn(fakeFs,'existsSync').andReturn(true);
 		spyOn(fakeUpdateService, 'update');
 
-		subject.sync(project);
+		subject.sync();
 
 		expect(fakeUpdateService.update).toHaveBeenCalledWith(fakeRepo, undefined);
 	});

@@ -4,10 +4,17 @@ var fs = require('fs'),
 	path = require('path'),
 	git = require('./git');
 
-exports.sync = function (project, cb) {
-	if (!fs.existsSync(path.join(project.path, '.git'))) {
-		cloner.clone(project, cb);
+var Project = function(path, gitUrl){
+	this.path = path;
+	this.gitUrl = gitUrl;
+};
+
+Project.prototype.sync = function (cb) {
+	if (!fs.existsSync(path.join(this.path, '.git'))) {
+		cloner.clone(this, cb);
 	} else {
-		updateService.update(git.open(project.path), cb);
+		updateService.update(git.open(this.path), cb);
 	}
 };
+
+module.exports = Project;
