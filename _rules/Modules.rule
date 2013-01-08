@@ -1,0 +1,3 @@
+Sound/Engine = git@github.com:willm/SoundEngine.git
+Karaoke = git@github.com:willm/7karaoke.git
+Web/Nancy = git@github.com:NancyFx/Nancy.git
