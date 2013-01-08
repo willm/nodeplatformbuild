@@ -30,7 +30,7 @@ describe("updater when project has not been cloned", function() {
 	it("should check if git the directory exists", function() {
 		spyOn(fakeFs,'existsSync');
 
-		subject.syncProject(project);
+		subject.sync(project);
 
 		expect(fakeFs.existsSync).toHaveBeenCalledWith(project.path + '/.git');
 	});
@@ -39,7 +39,7 @@ describe("updater when project has not been cloned", function() {
 		spyOn(fakeFs,'existsSync').andReturn(false);
 		spyOn(fakeCloner, 'clone');
 
-		subject.syncProject(project);
+		subject.sync(project);
 
 		expect(fakeCloner.clone).toHaveBeenCalledWith(project, undefined);
 	});
@@ -48,7 +48,7 @@ describe("updater when project has not been cloned", function() {
 		spyOn(fakeFs,'existsSync').andReturn(false);
 		spyOn(fakeUpdateService, 'update');
 
-		subject.syncProject(project);
+		subject.sync(project);
 
 		expect(fakeUpdateService.update).wasNotCalled();
 	});
@@ -57,7 +57,7 @@ describe("updater when project has not been cloned", function() {
 		spyOn(fakeFs,'existsSync').andReturn(true);
 		spyOn(fakeCloner, 'clone');
 
-		subject.syncProject(project);
+		subject.sync(project);
 
 		expect(fakeCloner.clone).wasNotCalled();
 
@@ -67,7 +67,7 @@ describe("updater when project has not been cloned", function() {
 		spyOn(fakeFs,'existsSync').andReturn(true);
 		spyOn(fakeUpdateService, 'update');
 
-		subject.syncProject(project);
+		subject.sync(project);
 
 		expect(fakeUpdateService.update).toHaveBeenCalledWith(fakeRepo, undefined);
 	});

@@ -19,7 +19,7 @@ describe('platform', function(){
 		};
 
 		runs(function(){
-			subject.syncProject({
+			subject.sync({
 				path: 'test',
 				gitUrl: 'git@github.com:willm/WebHelper.git'
 			}, cloneComplete);
